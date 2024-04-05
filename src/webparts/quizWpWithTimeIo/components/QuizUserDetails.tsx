@@ -1,11 +1,14 @@
 import * as React from 'react';
 import { Form } from 'react-bootstrap';
-import { reactRoutes, userDetailHeaderText } from '../../../helper/constants';
+import { quizResponseInternalName, quizResponseTitle, reactRoutes, userDetailHeaderText } from '../../../helper/constants';
+import { createListItem } from '../../../service/service';
 
 export interface  QuizUserDetailsProps{
+  context:any
 }
 export interface QuizUserDetailsStates{
-    name: string,
+    email:string;
+    name: string;
     country: string
 }
 
@@ -13,6 +16,7 @@ export default class QuizUserDetails extends React.Component<QuizUserDetailsProp
     constructor(props: QuizUserDetailsProps) {
         super(props);
         this.state = {
+            email:'',
             name: '',
             country: ''
         };
@@ -28,6 +32,10 @@ export default class QuizUserDetails extends React.Component<QuizUserDetailsProp
               <div className="container form-container instructions">
               <form onSubmit={this.handleSubmit}>
             {/* User Details */}
+            <div className="form-group">
+              <label htmlFor="name">Email:</label>
+              <input type="text" className="form-control" id="email" name="email" value={this.state.email} onChange={(e) => { this.setState({ email: e.target.value})}} required />
+            </div>
             <div className="form-group">
               <label htmlFor="name">Name:</label>
               <input type="text" className="form-control" id="name" name="name" value={this.state.name} onChange={(e) => { this.setState({ name: e.target.value }) }} required />
@@ -48,7 +56,6 @@ export default class QuizUserDetails extends React.Component<QuizUserDetailsProp
               <button type="submit" className="btn btn-submit">Submit</button>
             </div>
             </form>
-
           </div>
           </div>
         </div>
@@ -56,17 +63,43 @@ export default class QuizUserDetails extends React.Component<QuizUserDetailsProp
         );
     }
 
-    handleSubmit = (e: any) => {
-      e.preventDefault();
-      const result = window.confirm("Are you sure you want to proceed?");
-      if (result) {
-        // Perform the action you want to proceed with
-        console.log("Action confirmed!");
-        window.location.href = `#${reactRoutes.quiz}`
-      } else {
-        // User clicked "Cancel" or closed the dialog
-        console.log("Action canceled!");
+    handleSubmit = async (e: any) => {
+      try {
+        e.preventDefault();
+        const result = window.confirm("Are you sure you want to proceed?");
+        if (result) {
+          let userDetailsBody  =  JSON.stringify({
+              __metadata: { type: `SP.Data.${quizResponseInternalName}ListItem` },
+              'Title': this.state.email,
+              'Name': this.state.name,
+              'Country': this.state.country
+            })
+  
+          let createItemResponse = await createListItem(this.props.context,userDetailsBody,quizResponseTitle);
+          if(createItemResponse > 0 ){
+            window.location.href = `#${reactRoutes.quiz}`
+          }
+          else{
+            console.log("Something went wrong.")
+          }
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
 
+     validateEmail = (e: any) => {
+      try {
+        if (!e.target.value) {
+          return false
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
+          return false
+        }
+        else{
+          return true
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
 }

@@ -9,6 +9,7 @@ import QuizUserDetails from './QuizUserDetails';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import QuizQuestions from './QuizQuestions';
 import QuizResult from './QuizResults';
+import QuizQuestionsNext from './QuizQuestionsNext';
 
 export default class QuizWpWithTimeIo extends React.Component<IQuizWpWithTimeIoProps, IQuizWpWithTimeIoStates> {
   constructor(props: IQuizWpWithTimeIoProps) {
@@ -26,10 +27,11 @@ export default class QuizWpWithTimeIo extends React.Component<IQuizWpWithTimeIoP
       <div className="background-image">
          <HashRouter>
                   <Routes>
-                    <Route path={reactRoutes.instructions} Component={QuizInstructions}></Route>
-                    <Route path={reactRoutes.userDetails} Component={QuizUserDetails}></Route>
-                    <Route path={reactRoutes.quiz} Component={QuizQuestions}></Route>
+                    <Route path={reactRoutes.instructions} Component={() => (<QuizInstructions/>)}></Route>
+                    <Route path={reactRoutes.userDetails} Component={() => (<QuizUserDetails context={this.props.context}/>)}></Route>
+                    <Route path={reactRoutes.quiz} Component={() => (<QuizQuestions context={this.props.context}/>)}></Route>
                     <Route path={reactRoutes.results} Component={QuizResult}></Route>
+                    <Route path='/quizNext'  Component={() => (<QuizQuestionsNext context={this.props.context}/>)} ></Route>
                   </Routes>
                 </HashRouter>  
       </div>

@@ -5,6 +5,11 @@
   .form-group {
       margin-bottom: 2rem;
   }
+
+  .form-group label {
+    padding-bottom: 1.5rem
+  }
+
   
   .header {
       background-color: #b13560;
@@ -41,6 +46,19 @@
     background-position: center;
   }
 
+  .text-center{
+    text-align: center;
+  }
+
+  .text-right{
+    text-align: right;
+  }
+
+
+  .nextButton
+  {
+    margin-top: 3rem;
+  }
 
   /* quiz result */
   .container.quizResults {
@@ -87,4 +105,45 @@
     margin-bottom: 0.2rem;
   }
 
+
+  .next-arrow{
+    margin-left: 0.5rem;
+  }
+
+  .btn-next{
+    align-items: center !important;
+    width: 16%!important;
+    display: inline-flex!important;
+    font-weight: 500!important;
+    padding: 0.75em 1em!important;
+    text-decoration: none!important;
+  }
+
     /* quiz result */
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+  }
+  .button {
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+  .green-border {
+      border-color: rgb(0, 121, 74);
+  }
+
+  .red-border {
+    border-color: #e90000;
+}
+
+  .button:disabled{
+    color:rgb(50, 49, 48)
+  }

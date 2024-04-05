@@ -21,7 +21,10 @@ export default class QuizWpWithTimeIoWebPart extends BaseClientSideWebPart<IQuiz
 
   public render(): void {
     const element: React.ReactElement<IQuizWpWithTimeIoProps> = React.createElement(
-      QuizWpWithTimeIo
+      QuizWpWithTimeIo,
+      {
+        context:this.context
+      }
     );
 
     ReactDom.render(element, this.domElement);

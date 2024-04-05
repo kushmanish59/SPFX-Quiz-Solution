@@ -12,6 +12,8 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
     "@fluentui/react": "^8.106.4",
     "@microsoft/sp-component-base": "1.18.2",
     "@microsoft/sp-core-library": "1.18.2",
@@ -24,6 +26,7 @@
     "react-bootstrap": "^2.10.2",
     "react-dom": "17.0.1",
     "react-router-dom": "^6.22.3",
+    "styled-components": "^6.1.8",
     "tslib": "2.3.1"
   },
   "devDependencies": {
