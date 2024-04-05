@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "spfx-quiz-solution-with-time-io-client-side-solution",
+    "id": "d5ffd252-7e0d-42c0-b573-9feed7f1bcc8",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "SPFXQuizSolutionWithTimeIO description"
+      },
+      "longDescription": {
+        "default": "SPFXQuizSolutionWithTimeIO description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "spfx-quiz-solution-with-time-io Feature",
+        "description": "The feature that activates elements of the spfx-quiz-solution-with-time-io solution.",
+        "id": "edd682b8-b492-45e0-8dfb-a492bf453f5c",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/spfx-quiz-solution-with-time-io.sppkg"
+  }
+}
