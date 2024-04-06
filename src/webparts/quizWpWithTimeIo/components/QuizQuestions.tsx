@@ -67,7 +67,7 @@ export default class QuizQuestions extends React.Component<QuizQuestionsProps, Q
                                 <label>Rachel's flight departs from Chicago at 1:30 PM CST and arrives in Los Angeles at 3:45 PM PST. How long is the flight in hours and minutes?</label><br />
                                  {/* <RadioButtonComponent radioItems={[{ name: "Paris", group: "capital" }]}></RadioButtonComponent> */}
                             </div>
-                            <div className="form-group">
+                            <div className="form-group text-center form-next">
                                 <label>What is the current time in Sydney, Australia?</label><br />
                                 <TimePicker placeholder={timePickerPlaceholder} useHour12={true} />
                             </div>

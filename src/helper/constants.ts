@@ -11,5 +11,6 @@ export const reactRoutes = {
 export const quizResponseTitle:string = "Quiz Responses";
 export const quizResponseInternalName:string = "QuizResponses";
 export const quizQuestionsMasterTitle:string = "Questions Master";
-export const timePickerPlaceholder:string = "Select Time";
+export const timePickerPlaceholder:string = "HH:MM";
+export const momentTimeFormat = "hh:mm"
 

@@ -2,11 +2,23 @@ import * as React from 'react';
 import { forwardRef, useState } from 'react';
 //import { Form } from 'react-bootstrap';
 
-export const RadioButtonComponent = forwardRef((props: { radioItems: string[], groupName: string, onChange: any, questionID: number, answer:string}, ref) => {
+export interface RadioButtonProps {
+  radioItems: string[],
+  groupName: string,
+  onChange: any,
+  questionID: number,
+  answer: string,
+  disabled: boolean
+}
+
+export const RadioButtonComponent = forwardRef((props: RadioButtonProps, ref) => {
 
   const [disabledButtons, setdisabledButtons] = useState(false);
   const [pressedButtonID, setpressedButtonID] = useState('');
   const [wrongButtonPressedID, setWrongButtonPressedID] = useState('');
+  React.useEffect(() => {
+    setdisabledButtons(false);
+  },[props.disabled]);
 
   // // Handler for text input changes
   const handleClick = (e:any,item:string) => {
@@ -16,13 +28,6 @@ export const RadioButtonComponent = forwardRef((props: { radioItems: string[], g
       setpressedButtonID(props.answer);
       setWrongButtonPressedID(item)
   };
-
-  // @ts-ignore
-  // const getSelectedValues = () => {
-  //   return {
-  //     selectedValue
-  //   };
-  // };
 
   return (
     <>
@@ -37,7 +42,7 @@ export const RadioButtonComponent = forwardRef((props: { radioItems: string[], g
         />
       )} */}
 
-      <div className="button-grid">
+      <div className="button-grid" >
       {props.radioItems.map((item) =>
             {
               let className = pressedButtonID === item ? "button green-border" : 

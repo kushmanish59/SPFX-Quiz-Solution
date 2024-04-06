@@ -11,7 +11,8 @@ export interface QuizQuestionsProps {
 export interface QuizQuestionsStates {
     currentQuestionIndex: number,
     questions: any[],
-    selectedAnswers: string[]
+    selectedAnswers: string[],
+    resetComponent:boolean
 }
 
 export default class QuizQuestionsNext extends Component<QuizQuestionsProps, QuizQuestionsStates> {
@@ -20,7 +21,8 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
         this.state = {
             currentQuestionIndex: 0,
             questions: [],
-            selectedAnswers: []
+            selectedAnswers: [],
+            resetComponent:false
         };
     }
 
@@ -44,7 +46,8 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
         selectedAnswers[currentQuestionIndex] = selectedAnswer;
         // Move to next question
         this.setState(prevState => ({
-            currentQuestionIndex: prevState.currentQuestionIndex + 1
+            currentQuestionIndex: prevState.currentQuestionIndex + 1,
+            resetComponent:!this.state.resetComponent
         }));
     }
 
@@ -70,20 +73,28 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
                     <div className="header">
                         <h2 className="text-center">{quizHeaderText}</h2>
                     </div>
-                    <div className="container form-container instructions">
-                        <div className='text-right'>
-                            {`${currentQuestionIndex+1} of ${questions.length}`}
+                    <div className="container form-container form-next">
+                        <div className='quiz-status'>
+                            <div className='text-right question-numbers'>
+                                {`${currentQuestionIndex+1} of ${questions.length}`}
+                            </div>
+                            <div className='text-right question-numbers'>
+                                {`Score: ${questions.length}`}
+                            </div>
                         </div>
+                       
                         <form onSubmit={this.handleSubmit}>
-                            <div className="form-group text-center">
+                            <div className="form-group quiz text-center">
                                 <label>{questions.length > 0 ? questions[currentQuestionIndex].Title : ''}</label><br />
 
                                 {
                                     questions.length > 0 ?
                                         questions[currentQuestionIndex].Choices != null ?
-                                            <RadioButtonComponent radioItems={questions[currentQuestionIndex].Choices.split(";")} groupName={questions[currentQuestionIndex].Title} onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} answer={questions[currentQuestionIndex].Answer}></RadioButtonComponent>
+                                            <RadioButtonComponent radioItems={questions[currentQuestionIndex].Choices.split(";")} groupName={questions[currentQuestionIndex].Title} onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} answer={questions[currentQuestionIndex].Answer}
+                                            disabled = {this.state.resetComponent}
+                                            ></RadioButtonComponent>
                                             :
-                                            <TimerComponent></TimerComponent>
+                                            <TimerComponent onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} answer={questions[currentQuestionIndex].Answer} reset={this.state.resetComponent}></TimerComponent>
                                         :
                                         null
                                 }
