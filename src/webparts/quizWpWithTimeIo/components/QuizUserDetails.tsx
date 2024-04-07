@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Form } from 'react-bootstrap';
-import { quizResponseInternalName, quizResponseTitle, reactRoutes, userDetailHeaderText } from '../../../helper/constants';
+import { IdQueryParamName, quizResponseInternalName, quizResponseTitle, reactRoutes, userDetailHeaderText } from '../../../helper/constants';
 import { createListItem } from '../../../service/service';
 
 export interface  QuizUserDetailsProps{
-  context:any
+  context:any;
+  // getUserInfoID:any
 }
 export interface QuizUserDetailsStates{
     email:string;
@@ -13,7 +14,7 @@ export interface QuizUserDetailsStates{
 }
 
 export default class QuizUserDetails extends React.Component<QuizUserDetailsProps, QuizUserDetailsStates> {
-    constructor(props: QuizUserDetailsProps) {
+  constructor(props: QuizUserDetailsProps) {
         super(props);
         this.state = {
             email:'',
@@ -77,7 +78,8 @@ export default class QuizUserDetails extends React.Component<QuizUserDetailsProp
   
           let createItemResponse = await createListItem(this.props.context,userDetailsBody,quizResponseTitle);
           if(createItemResponse > 0 ){
-            window.location.href = `#${reactRoutes.quiz}`
+            //this.props.getUserInfoID(createItemResponse);
+            window.location.href = `#${reactRoutes.quiz}?${IdQueryParamName}=${createItemResponse}`
           }
           else{
             console.log("Something went wrong.")

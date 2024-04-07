@@ -21,7 +21,7 @@ export const TimerComponent = forwardRef((props:TimerProps, ref) => {
     e.preventDefault();
     props.onChange(moment(time).format(momentTimeFormat),props.questionID);
     console.log(moment(time).format(momentTimeFormat));
-    setWrongAnswerClass('red-border');
+    //setWrongAnswerClass('red-border');
     setdisabledControl(true);
   };
 

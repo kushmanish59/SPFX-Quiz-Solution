@@ -3,4 +3,5 @@ export interface IQuizWpWithTimeIoStates {
   country: string,
   showQuiz:boolean,
   headerText:string
+  recordID:number
 }

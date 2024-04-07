@@ -1,41 +1,66 @@
 import * as React from 'react';
-import { quizHeaderText, quizQuestionsMasterTitle } from '../../../helper/constants';
+import { IdQueryParamName, answerObjKey, questionObjectKey, quizHeaderText, quizQuestionsMasterTitle, quizResponseInternalName, quizResponseTitle, reactRoutes } from '../../../helper/constants';
 import { Component } from 'react';
 import { TimerComponent } from '../../../components/TimerControl';
-import { getListItems } from '../../../service/service';
+import { getListItems, updateListItem } from '../../../service/service';
 import { RadioButtonComponent } from '../../../components/radioButtonComponent';
 
 export interface QuizQuestionsProps {
-    context: any
+    context: any;
+
 }
 export interface QuizQuestionsStates {
     currentQuestionIndex: number,
     questions: any[],
     selectedAnswers: string[],
     resetComponent:boolean
+    userRecordID:number;
 }
 
+//const { hash } = useLocation();
 export default class QuizQuestionsNext extends Component<QuizQuestionsProps, QuizQuestionsStates> {
+    public userResponses:any = [];
     constructor(props: QuizQuestionsProps) {
         super(props);
         this.state = {
             currentQuestionIndex: 0,
             questions: [],
             selectedAnswers: [],
-            resetComponent:false
+            resetComponent:false,
+            userRecordID:0
         };
     }
 
     handleChange = (value:string,questionID:number) =>{
         try {
-            console.log(questionID," - ",value)
+            console.log(questionID," - ",value);
+            let userResponseObj:any = {};
+            let keyQuestion = questionObjectKey;
+            let keyAnswer = answerObjKey;
+            userResponseObj[keyQuestion] = questionID;
+            userResponseObj[keyAnswer] = value;
+            this.userResponses.push(userResponseObj);
+            console.log(this.userResponses);
         } catch (error) {
             console.log(error)
         }
     } 
 
-    handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        let userResponseBody  =  JSON.stringify({
+            __metadata: { type: `SP.Data.${quizResponseInternalName}ListItem` },
+            'QuizResponseJson': JSON.stringify(this.userResponses)
+          })
+
+        let updateResponse = await updateListItem(this.props.context,this.state.userRecordID,userResponseBody,quizResponseTitle);
+        if(updateResponse > 0 ){
+          //this.props.getUserInfoID(createItemResponse);
+          window.location.href = `#${reactRoutes.results}?${IdQueryParamName}=${updateResponse}`
+        }
+        else{
+          console.log("Something went wrong.")
+        }
     }
 
     handleNext = () => {
@@ -54,11 +79,16 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
     async componentDidMount(): Promise<void> {
         try {
             let questions = await getListItems(this.props.context, quizQuestionsMasterTitle, '$select=Id,Title,Answer,Choices,QuestionType&$orderby=Sequence');
-            this.setState(
-                {
-                    questions: questions
-                }
-            )
+            let params = new URLSearchParams(window.location.hash);
+            let userRecordID: any = params.get(IdQueryParamName);
+            if(userRecordID){
+                this.setState(
+                    {
+                        questions: questions,
+                        userRecordID:userRecordID
+                    }
+                )
+            }
             console.log(questions);
         } catch (error) {
             console.log(error)

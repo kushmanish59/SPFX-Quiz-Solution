@@ -1,6 +1,6 @@
 import { SPHttpClient, SPHttpClientResponse, ISPHttpClientOptions } from '@microsoft/sp-http';
 
-export const updateListItem = (context: any, itemID: number, body: any, listName: string) => {
+export const updateListItem = async (context: any, itemID: number, body: any, listName: string): Promise<number> => {
   try {
     const endpoint = `/_api/web/lists/getByTitle('${listName}')/items(${itemID})`;
     const url = `${context.pageContext.web.absoluteUrl}${endpoint}`;
@@ -10,11 +10,12 @@ export const updateListItem = (context: any, itemID: number, body: any, listName
         'Accept': 'application/json;odata=verbose',
         'Content-Type': 'application/json;odata=verbose',
         'X-HTTP-Method': 'MERGE',
-        'IF-MATCH': '*'
+        'IF-MATCH': '*',
+        'odata-version': ''
       },
       body: body
     };
-    context.spHttpClient.post(url, SPHttpClient.configurations.v1, requestOptions)
+    return await context.spHttpClient.post(url, SPHttpClient.configurations.v1, requestOptions)
       .then((response: SPHttpClientResponse) => {
         if (response.ok) {
           return response.json().then((result) => {
@@ -30,6 +31,7 @@ export const updateListItem = (context: any, itemID: number, body: any, listName
       });
   } catch (error) {
     console.log(error)
+    return 0 ;
   }
 };
 
