@@ -155,7 +155,7 @@ h1 {
 }
 
 .green-border {
-  border:  3px solid rgb(0, 121, 74);
+  border:  3px solid #00794a;
 }
 
 .red-border {
@@ -223,7 +223,7 @@ h1 {
 
 
 /* quiz label and status */
-.quiz label {
+.quiz .question-label {
   font-size: 20px;
   font-weight: 400;
   padding: 40px;
@@ -245,4 +245,11 @@ h1 {
   font-weight: bold;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.correct-answer{
+  padding: 0;
+  color: #00794a;
+  font-size: 20px;
+  font-weight: 400;
 }

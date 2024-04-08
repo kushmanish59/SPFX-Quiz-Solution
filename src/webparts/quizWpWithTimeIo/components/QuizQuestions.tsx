@@ -1,8 +1,8 @@
 import * as React from 'react';
 //import { RadioButtonComponent } from '../../../components/radioButtonComponent';
-import { quizHeaderText, quizQuestionsMasterTitle, timePickerPlaceholder } from '../../../helper/constants';
+import { SPLists, quizHeaderText, timePickerPlaceholder } from '../../../helper/constants';
 import { TimePicker } from '@fluentui/react';
-import { getListItems } from '../../../service/service';
+import { getListItems } from '../../../service/SPService';
 
 export interface QuizQuestionsProps {
     context:any
@@ -103,7 +103,7 @@ export default class QuizQuestions extends React.Component<QuizQuestionsProps, Q
 
     async componentDidMount(): Promise<void> {
         try {
-            let questions = await getListItems (this.props.context,quizQuestionsMasterTitle,'$select=Title,Answer,Choices,QuestionType&$orderby=Sequence');
+            const questions = await getListItems (this.props.context,SPLists.quizQuestionsMasterTitle,'$select=Title,Answer,Choices,QuestionType&$orderby=Sequence');
             console.log(questions);
         } catch (error) {
             console.log(error) 

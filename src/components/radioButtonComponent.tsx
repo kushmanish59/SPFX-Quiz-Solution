@@ -45,7 +45,7 @@ export const RadioButtonComponent = forwardRef((props: RadioButtonProps, ref) =>
       <div className="button-grid" >
       {props.radioItems.map((item) =>
             {
-              let className = pressedButtonID === item ? "button green-border" : 
+              const className = pressedButtonID === item ? "button green-border" : 
               wrongButtonPressedID === item? "button red-border" : "button";
               return <button type='button' id={item} disabled={disabledButtons} className={className} onClick={(e)=>handleClick(e,item)}>{item}</button>
             }

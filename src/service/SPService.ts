@@ -1,4 +1,5 @@
 import { SPHttpClient, SPHttpClientResponse, ISPHttpClientOptions } from '@microsoft/sp-http';
+import { SPLists } from '../helper/constants';
 
 export const updateListItem = async (context: any, itemID: number, body: any, listName: string): Promise<number> => {
   try {
@@ -49,7 +50,7 @@ export const createListItem = async (context: any, body: any, listName: string) 
       body: body
     };
 
-    let response = await context.spHttpClient.post(url, SPHttpClient.configurations.v1, requestOptions)
+    const response = await context.spHttpClient.post(url, SPHttpClient.configurations.v1, requestOptions)
       .then((response: SPHttpClientResponse) => {
         if (response.ok) {
           return response.json().then((result) => {
@@ -84,7 +85,7 @@ export const getListItems = async (context: any, listName: string, params:string
       }
     };
 
-    let response = await context.spHttpClient.get(url, SPHttpClient.configurations.v1, requestOptions)
+    const response = await context.spHttpClient.get(url, SPHttpClient.configurations.v1, requestOptions)
       .then((response: SPHttpClientResponse) => {
         if (response.ok) {
           return response.json().then((json: any) => {
@@ -105,3 +106,15 @@ export const getListItems = async (context: any, listName: string, params:string
   }
 };
 
+export const getConfigListItems = async(context:any, key:string):Promise<string> => {
+  try {
+    const queryString = `$select=Title,Value&$filter=Title eq '${key}'`;
+    const resConfigItems = await getListItems(context,SPLists.configListTitle,queryString);
+    if(resConfigItems && resConfigItems.length > 0){
+      return resConfigItems[0].Value
+    }
+  } catch (error) {
+    console.log(error)
+  }
+  return '';
+}
