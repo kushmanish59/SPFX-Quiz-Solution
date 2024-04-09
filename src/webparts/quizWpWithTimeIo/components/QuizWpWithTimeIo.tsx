@@ -42,7 +42,7 @@ export default class QuizWpWithTimeIo extends React.Component<IQuizWpWithTimeIoP
               <Route path={reactRoutes.instructions} Component={() => (<QuizInstructions />)}></Route>
               <Route path={reactRoutes.userDetails} Component={() => (<QuizUserDetails context={this.props.context}/>)}></Route>
               {/* <Route path={reactRoutes.quiz} Component={() => (<QuizQuestions context={this.props.context} />)}></Route> */}
-              <Route path={reactRoutes.results} Component={QuizResult}></Route>
+              <Route path={reactRoutes.results} Component={() => (<QuizResult context={this.props.context}/>)} ></Route>
               <Route path={reactRoutes.quiz} Component={() => (<QuizQuestionsNext context={this.props.context}/>)} ></Route>
             </Routes>
           </HashRouter>

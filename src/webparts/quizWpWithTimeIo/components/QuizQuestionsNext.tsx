@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { IdQueryParamName, SPLists, answerObjKey, currentDateReplacePlaceHolder, momentDateFormat, momentTimeFormat, questionObjectKey, questionTypes, quizHeaderText, reactRoutes } from '../../../helper/constants';
+import { IdQueryParamName, SPLists, answerNotSelectedText, currentDateReplacePlaceHolder, momentDateFormat, momentTimeFormat, questionTypes, quizHeaderText, reactRoutes, userResponseJsonKeys } from '../../../helper/constants';
 import { Component } from 'react';
 import { TimerComponent } from '../../../components/TimerControl';
 import { getListItems, updateListItem } from '../../../service/SPService';
 import { RadioButtonComponent } from '../../../components/radioButtonComponent';
 import { TimeService } from '../../../service/TimeAPIService';
 import * as moment from 'moment';
+import { AnswerFeedback } from '../../../components/AnswerFeedback';
 
 export interface QuizQuestionsProps {
     context: any;
@@ -14,9 +15,13 @@ export interface QuizQuestionsProps {
 export interface QuizQuestionsStates {
     currentQuestionIndex: number,
     questions: any[],
-    selectedAnswers: string[],
-    resetComponent: boolean
+    selectedAnswer: string,
+    resetComponent: boolean,
+    showAnswerSelectionError: boolean;
+    showAnswerFeedback: boolean;
     userRecordID: number;
+    isAnswerCorrect: boolean;
+    score: number;
 }
 
 //const { hash } = useLocation();
@@ -28,21 +33,24 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
         this.state = {
             currentQuestionIndex: 0,
             questions: [],
-            selectedAnswers: [],
+            selectedAnswer: '',
             resetComponent: false,
-            userRecordID: 0
+            userRecordID: 0,
+            isAnswerCorrect: false,
+            showAnswerSelectionError: false,
+            showAnswerFeedback: false,
+            score: 0
         };
     }
 
-    handleChange = (value: string, questionID: number) => {
+    handleChange = (answer: string, questionID: number, isAnswerCorrect: boolean, correctAnswer: string) => {
         try {
-            console.log(questionID, " - ", value);
             let userResponseObj: any = {};
-            // let keyQuestion = questionObjectKey;
-            // let keyAnswer = answerObjKey;
-            userResponseObj[questionObjectKey] = questionID;
-            userResponseObj[answerObjKey] = value;
+            userResponseObj[userResponseJsonKeys.questionObjectKey] = questionID;
+            userResponseObj[userResponseJsonKeys.answerObjKey] = answer;
+            userResponseObj[userResponseJsonKeys.correctAnswerObjKey] = correctAnswer;
             this.userResponses.push(userResponseObj);
+            this.setState({ selectedAnswer: answer, showAnswerSelectionError: false, isAnswerCorrect: isAnswerCorrect, showAnswerFeedback: true });
             console.log(this.userResponses);
         } catch (error) {
             console.log(error)
@@ -53,13 +61,14 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
         e.preventDefault();
         const userResponseBody = JSON.stringify({
             __metadata: { type: `SP.Data.${SPLists.quizResponseInternalName}ListItem` },
-            'QuizResponseJson': JSON.stringify(this.userResponses)
+            'QuizResponseJson': JSON.stringify(this.userResponses),
+            'Score': this.state.score
         })
 
         const updateResponse = await updateListItem(this.props.context, this.state.userRecordID, userResponseBody, SPLists.quizResponseTitle);
-        if (updateResponse > 0) {
+        if (updateResponse) {
             //this.props.getUserInfoID(createItemResponse);
-            window.location.href = `#${reactRoutes.results}?${IdQueryParamName}=${updateResponse}`
+            window.location.href = `#${reactRoutes.results}?&${IdQueryParamName}=${this.state.userRecordID}`
         }
         else {
             console.log("Something went wrong.")
@@ -67,22 +76,30 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
     }
 
     handleNext = () => {
-        const { currentQuestionIndex, selectedAnswers } = this.state;
+        const { isAnswerCorrect } = this.state;
         // Save selected answer for current question
         // Assuming you have a function to get selected answer from your radio button component
-        const selectedAnswer = ""; // Get selected answer here
-        selectedAnswers[currentQuestionIndex] = selectedAnswer;
-        // Move to next question
-        this.setState(prevState => ({
-            currentQuestionIndex: prevState.currentQuestionIndex + 1,
-            resetComponent: !this.state.resetComponent
-        }));
+        if (this.state.selectedAnswer) {
+            // Move to next question
+            this.setState(prevState => ({
+                currentQuestionIndex: prevState.currentQuestionIndex + 1,
+                resetComponent: !this.state.resetComponent,
+                selectedAnswer: '', // reset the selected answer pointer
+                showAnswerSelectionError: false,
+                showAnswerFeedback: false,
+                score: isAnswerCorrect ? prevState.score + 1 : prevState.score
+            }));
+        }
+        else {
+            this.setState({
+                showAnswerSelectionError: true,
+            })
+        }
     }
 
     async componentDidMount(): Promise<void> {
         try {
             const questions = await getListItems(this.props.context, SPLists.quizQuestionsMasterTitle, '$select=Id,Question,Answer,Choices,QuestionType,Config,APIURL&$orderby=Sequence');
-            
             const promises: Promise<void>[] = questions.map(async (question: any) => {
                 if (question.QuestionType == questionTypes.time) {
                     if (question.Config && question.APIURL) {
@@ -91,8 +108,8 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
                         let choiceTypeTimeAnswers: any = {};
                         const answerResponse = await TimeService('/Conversion/ConvertTimeZone', this.props.context, JSON.parse(body));
                         if (answerResponse) {
-                            choiceTypeTimeAnswers[questionObjectKey] = question.Id;
-                            choiceTypeTimeAnswers[answerObjKey] = moment(answerResponse.conversionResult.dateTime).format(momentTimeFormat);
+                            choiceTypeTimeAnswers[userResponseJsonKeys.questionObjectKey] = question.Id;
+                            choiceTypeTimeAnswers[userResponseJsonKeys.correctAnswerObjKey] = moment(answerResponse.conversionResult.dateTime).format(momentTimeFormat);
                             this.questionTypeTimeAnswers.push(choiceTypeTimeAnswers);
                         }
                         else {
@@ -105,35 +122,8 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
                     }
                 }
             });
-        
             // Wait for all promises to resolve
             await Promise.all(promises);
-
-            // await questions.forEach(async (question: any) => {
-            //     if (question.QuestionType == questionTypes.time) {
-            //         //console.log(question.Config, question.APIURL);
-            //         if (question.Config && question.APIURL) {
-            //             let body = question.Config;
-            //             body = body.replaceAll(currentDateReplacePlaceHolder, moment().format(momentDateFormat))
-            //             let choiceTypeTimeAnswers: any = {};
-            //             const answerResponse = await TimeService('/Conversion/ConvertTimeZone', this.props.context, JSON.parse(body));
-            //             if (answerResponse) {
-            //                 choiceTypeTimeAnswers[questionObjectKey] = question.Id;
-            //                 choiceTypeTimeAnswers[answerObjKey] = moment(answerResponse.conversionResult.dateTime).format(momentTimeFormat);
-            //                 this.questionTypeTimeAnswers.push(choiceTypeTimeAnswers);
-            //             }
-            //             else {
-            //                 console.log("azure function error");
-            //             }
-            //             console.log(this.questionTypeTimeAnswers);
-            //         }
-            //         else {
-            //             console.log("config or API URL is missing");
-            //         }
-            //     }
-            // })
-            //const answerResponse = await TimeService('/Conversion/ConvertTimeZone',this.props.context);
-            //console.log(answerResponse);
             const params = new URLSearchParams(window.location.hash);
             const userRecordID: any = params.get(IdQueryParamName);
             if (userRecordID) {
@@ -152,16 +142,16 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
 
     render() {
         const { currentQuestionIndex, questions } = this.state;
-        
+
         const answerToTimeQuestion =
             // @ts-ignore
-            questions.length > 0 && this.questionTypeTimeAnswers.filter(x => x[questionObjectKey] == questions[currentQuestionIndex].Id).length > 0 ?
+            questions.length > 0 && this.questionTypeTimeAnswers.filter(x => x[userResponseJsonKeys.questionObjectKey] == questions[currentQuestionIndex].Id).length > 0 ?
                 // @ts-ignore
-                this.questionTypeTimeAnswers.filter(x => x[questionObjectKey] == questions[currentQuestionIndex].Id)[0][answerObjKey]
+                this.questionTypeTimeAnswers.filter(x => x[userResponseJsonKeys.questionObjectKey] == questions[currentQuestionIndex].Id)[0][userResponseJsonKeys.correctAnswerObjKey]
                 : '';
 
-        const answer = questions.length > 0 && questions[currentQuestionIndex].QuestionType === questionTypes.choice ? questions[currentQuestionIndex].Answer : answerToTimeQuestion
-       
+        const correctAnswer = questions.length > 0 && questions[currentQuestionIndex].QuestionType === questionTypes.choice ? questions[currentQuestionIndex].Answer : answerToTimeQuestion
+
         return (
             questions.length > 0 &&
             <div className="container-fluid">
@@ -175,22 +165,32 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
                                 {`${currentQuestionIndex + 1} of ${questions.length}`}
                             </div>
                             <div className='text-right question-numbers'>
-                                {`Score: ${questions.length}`}
+                                {`Score: ${this.state.score}`}
                             </div>
                         </div>
 
-                        <form onSubmit={this.handleSubmit}>
+                        <form>
                             <div className="form-group quiz text-center">
                                 <label className='question-label '>{questions.length > 0 ? questions[currentQuestionIndex].Question : ''}</label><br />
+                                {
+                                    this.state.showAnswerSelectionError &&
+                                    <div className="form-group text-center">
+                                        <label className='select-answer'>{`${answerNotSelectedText}`}</label><br />
+                                    </div>
+                                }
+                                {
+                                    this.state.showAnswerFeedback &&
+                                    <AnswerFeedback correctAnswer={correctAnswer} isCorrect={this.state.isAnswerCorrect}></AnswerFeedback>
+                                }
 
                                 {
                                     questions.length > 0 ?
                                         questions[currentQuestionIndex].QuestionType === questionTypes.choice ?
-                                            <RadioButtonComponent radioItems={questions[currentQuestionIndex].Choices.split(";")} groupName={questions[currentQuestionIndex].Question} onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} answer={answer}
+                                            <RadioButtonComponent radioItems={questions[currentQuestionIndex].Choices.split(";")} groupName={questions[currentQuestionIndex].Question} onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} correctAnswer={correctAnswer}
                                                 disabled={this.state.resetComponent}
                                             ></RadioButtonComponent>
                                             :
-                                            <TimerComponent onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} answer={answer} reset={this.state.resetComponent}></TimerComponent>
+                                            <TimerComponent onChange={this.handleChange} questionID={questions[currentQuestionIndex].Id} correctAnswer={correctAnswer} reset={this.state.resetComponent}></TimerComponent>
                                         :
                                         null
                                 }
@@ -202,7 +202,13 @@ export default class QuizQuestionsNext extends Component<QuizQuestionsProps, Qui
                                             <svg aria-hidden="true" className="rmd-icon rmd-icon--svg next-arrow" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path></svg>
                                         </button>
                                     ) : (
-                                        <button type="submit" className="btn btn-submit">Submit</button>
+                                        <button type="button"
+                                            onClick={(e: any) => {
+                                                this.setState(prevState => ({
+                                                    score: this.state.isAnswerCorrect ? prevState.score + 1 : prevState.score
+                                                }), () => this.handleSubmit(e));
+                                            }}
+                                            className="btn btn-submit">Submit</button>
                                     )}
                                 </div>
 

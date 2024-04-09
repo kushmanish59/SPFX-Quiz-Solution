@@ -1,22 +1,50 @@
 import * as React from 'react';
-import { reactRoutes, resultsHeaderText } from '../../../helper/constants';
+import { IdQueryParamName, SPLists, congratulationText, failedText, qualificationScore, reactRoutes, resultsHeaderText } from '../../../helper/constants';
+import { getListItemByID, getListItems } from '../../../service/SPService';
 
 export interface QuizResultProps {
+    context:any
 }
 export interface QuizResultStates {
-    name: string,
-    country: string,
-    q1: string,
-    q2: string,
-    q3: string
+    score:number;
+    totalScore:number;
 }
 
 export default class QuizResult extends React.Component<QuizResultProps, QuizResultStates> {
     constructor(props: QuizResultProps) {
         super(props);
+        this.state = {
+            score:0,
+            totalScore:0
+        }
+    }
+
+    async componentDidMount(): Promise<void> {
+        try {
+            const params = new URLSearchParams(window.location.hash);
+            const userRecordID: any = params.get(IdQueryParamName);
+            const quizResponse = await getListItemByID(this.props.context, SPLists.quizResponseTitle,userRecordID, '$select=Id,Score');
+            const questions = await getListItems(this.props.context, SPLists.quizQuestionsMasterTitle, '$select=Id,Question,Answer,Choices,QuestionType,Config,APIURL&$orderby=Sequence');
+            if(quizResponse && questions){
+                this.setState({
+                    score:quizResponse.Score,
+                    totalScore:questions.length
+                });
+            }
+            else{
+                console.log("Something went wrong.")
+            }
+            
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     public render(): React.ReactElement<QuizResultProps> {
+        const {score, totalScore} = this.state;
+        const percentageScore = (score / totalScore) * 100;
+        const feedbackText = percentageScore > qualificationScore ? congratulationText  : failedText;
+        const feedbackTextClass = percentageScore > qualificationScore ? "text-green"  : "text-red";
         return (
             <div className="container-fluid">
                 <div className="container">
@@ -24,12 +52,13 @@ export default class QuizResult extends React.Component<QuizResultProps, QuizRes
                         <h2 className="text-center">{resultsHeaderText}</h2>
                     </div>
                     <div className="container form-container quizResults">
-                        <h1>Quiz Result</h1>
-                        <div className="result">
-                            Congratulations!
+                        <div className={`result ${feedbackTextClass}`}>
+                            {
+                                feedbackText
+                            }
                         </div>
                         <div className="score">
-                            You scored <span>5 out of 5</span> points.
+                            You scored <span className={feedbackTextClass}>{score} out of {totalScore}</span> points.
                         </div>
                         <button className="quiz-restart" onClick={this.handleSubmit}>Restart Quiz</button>
                     </div>

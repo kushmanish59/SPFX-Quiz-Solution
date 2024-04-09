@@ -1,7 +1,7 @@
 import { SPHttpClient, SPHttpClientResponse, ISPHttpClientOptions } from '@microsoft/sp-http';
 import { SPLists } from '../helper/constants';
 
-export const updateListItem = async (context: any, itemID: number, body: any, listName: string): Promise<number> => {
+export const updateListItem = async (context: any, itemID: number, body: any, listName: string): Promise<boolean> => {
   try {
     const endpoint = `/_api/web/lists/getByTitle('${listName}')/items(${itemID})`;
     const url = `${context.pageContext.web.absoluteUrl}${endpoint}`;
@@ -19,20 +19,17 @@ export const updateListItem = async (context: any, itemID: number, body: any, li
     return await context.spHttpClient.post(url, SPHttpClient.configurations.v1, requestOptions)
       .then((response: SPHttpClientResponse) => {
         if (response.ok) {
-          return response.json().then((result) => {
-            console.log(result.d.Id);
-            return result.d.Id;
-          });
+          return true
         } else {
-          return 0;
+          return false;
         }
       })
       .catch((error: any) => {
-        return 0;
+        return false;
       });
   } catch (error) {
     console.log(error)
-    return 0 ;
+    return false ;
   }
 };
 
@@ -105,6 +102,41 @@ export const getListItems = async (context: any, listName: string, params:string
     return 0 ;
   }
 };
+
+export const getListItemByID = async (context: any, listName: string, id:number, params:string) : Promise<any> => {
+  try {
+    const endpoint = `/_api/web/lists/getByTitle('${listName}')/items('${id}')?${params}`;
+    const url = `${context.pageContext.web.absoluteUrl}${endpoint}`;
+
+    const requestOptions: ISPHttpClientOptions = {
+      headers: {
+        'Accept': 'application/json;odata=verbose',
+        'Content-Type': 'application/json;odata=verbose',
+        'odata-version': ''
+      }
+    };
+
+    const response = await context.spHttpClient.get(url, SPHttpClient.configurations.v1, requestOptions)
+      .then((response: SPHttpClientResponse) => {
+        if (response.ok) {
+          return response.json().then((json: any) => {
+            return json.d;
+          });
+        } else {
+          return 0;
+        }
+      })
+      .catch((error: any) => {
+        return 0;
+      });
+
+    return response;
+  } catch (error) {
+    console.log(error)
+    return 0 ;
+  }
+};
+
 
 export const getConfigListItems = async(context:any, key:string):Promise<string> => {
   try {

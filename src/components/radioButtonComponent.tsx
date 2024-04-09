@@ -7,7 +7,7 @@ export interface RadioButtonProps {
   groupName: string,
   onChange: any,
   questionID: number,
-  answer: string,
+  correctAnswer: string,
   disabled: boolean
 }
 
@@ -24,24 +24,14 @@ export const RadioButtonComponent = forwardRef((props: RadioButtonProps, ref) =>
   const handleClick = (e:any,item:string) => {
     e.preventDefault();
     setdisabledButtons(true);
-      props.onChange(item,props.questionID)
-      setpressedButtonID(props.answer);
-      setWrongButtonPressedID(item)
+    const isAnswerCorrect : boolean = item === props.correctAnswer ? true : false;
+    props.onChange(item,props.questionID,isAnswerCorrect, props.correctAnswer)
+    setpressedButtonID(props.correctAnswer);
+    setWrongButtonPressedID(item);
   };
 
   return (
     <>
-      {/* {props.radioItems.map((item) =>
-        <Form.Check
-          inline
-          label={item}
-          name={props.groupName}
-          type="radio"
-          id={Math.random().toString()}
-          onChange={(e) => props.onChange(e, props.questionID)}
-        />
-      )} */}
-
       <div className="button-grid" >
       {props.radioItems.map((item) =>
             {
