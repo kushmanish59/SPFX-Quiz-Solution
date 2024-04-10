@@ -3,6 +3,7 @@
   "id": "abca65e6-5788-4229-9d3a-375b7326d629",
   "alias": "QuizWpWithTimeIoWebPart",
   "componentType": "WebPart",
+  "supportsFullBleed": true,
 
   // The "*" signifies that the version should be taken from the package.json
   "version": "*",

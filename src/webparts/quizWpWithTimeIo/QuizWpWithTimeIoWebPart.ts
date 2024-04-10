@@ -10,7 +10,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'QuizWpWithTimeIoWebPartStrings';
 import QuizWpWithTimeIo from './components/QuizWpWithTimeIo';
-import { IQuizWpWithTimeIoProps } from './components/IQuizWpWithTimeIoProps';
+import { IQuizWpWithTimeIoProps } from './components/models/IQuizWpWithTimeIoProps';
 
 export interface IQuizWpWithTimeIoWebPartProps {
   description: string;
