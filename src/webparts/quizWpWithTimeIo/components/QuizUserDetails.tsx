@@ -49,7 +49,7 @@ export default class QuizUserDetails extends React.Component<QuizUserDetailsProp
               <div className="form-group">
                 <label htmlFor="country">Profession:</label>
                 <Form.Select aria-label="Default select example" id="country" name="country" value={this.state.profession} onChange={(e) => { this.setState({ profession: e.target.value }) }}>
-                  <option value="" disabled>Select Profression</option>
+                  <option value="" disabled>Select Profession</option>
                   <option value="USA">Bussines</option>
                   <option value="UK">Salaried</option>
                   <option value="Canada">Student</option>
